@@ -5,7 +5,7 @@ from functools import lru_cache
 from tavily import AsyncTavilyClient
 
 from ingestion.pipeline import search_documents
-
+MIN_SCORE = 0.25
 QUERY_SCHEMA = {
     "type": "object",
     "properties": {
@@ -40,8 +40,8 @@ def get_tavily() -> AsyncTavilyClient:
 
 async def search_my_documents(query: str) -> str:
     hits = await asyncio.to_thread(search_documents, query)
-    MIN_SCORE = 0.25
-    if not hits or hits<MIN_SCORE:
+    hits = [h for h in hits if h["score"] >= MIN_SCORE]
+    if not hits:
         return "No matching passages found in the uploaded documents."
     return "\n\n".join(f"[{h['source']}] (score {h['score']})\n{h['text']}" for h in hits)
 
@@ -63,4 +63,5 @@ async def run_tool(name: str, tool_input: dict) -> tuple[str, bool]:
             return await web_search(tool_input["query"]), False
         return f"Unknown tool: {name}", True
     except Exception as e:
+        print(f"Tool {name} failed: {e!r}")
         return f"{name} failed: {e}", True
