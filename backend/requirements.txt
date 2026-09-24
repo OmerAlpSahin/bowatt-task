@@ -6,3 +6,5 @@ anthropic
 chromadb
 tavily-python
 sentence-transformers
+pytest
+httpx2
