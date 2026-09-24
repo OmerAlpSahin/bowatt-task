@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from fastapi import HTTPException
-
+import asyncio
 from agent.agent import run_agent
 import logging
 
@@ -15,6 +15,9 @@ async def stream_answer(question: str):
     try:
         async for piece in run_agent(question):
             yield piece
+    except asyncio.CancelledError:
+        logger.info("Research cancelled: the client disconnected")
+        raise
     except anthropic.AuthenticationError:
         logger.error("Anthropic rejected the API key")
         yield "\n\n**Error:** the research service is misconfigured (invalid API key)."
