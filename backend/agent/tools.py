@@ -3,6 +3,9 @@ import os
 from functools import lru_cache
 
 from tavily import AsyncTavilyClient
+import logging
+
+logger = logging.getLogger(__name__)
 
 from ingestion.pipeline import search_documents
 MIN_SCORE = 0.25
@@ -63,5 +66,5 @@ async def run_tool(name: str, tool_input: dict) -> tuple[str, bool]:
             return await web_search(tool_input["query"]), False
         return f"Unknown tool: {name}", True
     except Exception as e:
-        print(f"Tool {name} failed: {e!r}")
+        logger.exception("Tool %s failed", name)
         return f"{name} failed: {e}", True
