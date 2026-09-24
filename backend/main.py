@@ -3,10 +3,22 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 load_dotenv()
 from rest import sources, research
+import asyncio
+from contextlib import asynccontextmanager
+
+from ingestion.embeddings import get_model
+from ingestion.vector_store import get_collection
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Warm up shared resources once, before any request can race to create them
+    await asyncio.to_thread(get_model)
+    await asyncio.to_thread(get_collection)
+    yield
 
-app = FastAPI(title="BoWattApp")
+
+app = FastAPI(title="BoWattApp", lifespan=lifespan)
 
 origins = [
     "http://localhost:5173",
