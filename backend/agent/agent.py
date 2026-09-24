@@ -29,17 +29,20 @@ async def run_agent(question: str):
     messages = [{"role": "user", "content": question}]
 
     for _ in range(MAX_TURNS):
-        response = await get_client().messages.create(
+        async with get_client().messages.stream(
             model=MODEL,
             max_tokens=16000,
             system=SYSTEM_PROMPT,
             tools=TOOLS,
             messages=messages,
-        )
+        ) as stream:
+            async for text in stream.text_stream:
+                yield text
+            response = await stream.get_final_message()
+        yield "\n\n"
 
         tool_calls = [b for b in response.content if b.type == "tool_use"]
         if not tool_calls:
-            yield "".join(b.text for b in response.content if b.type == "text")
             return
 
         for call in tool_calls:
