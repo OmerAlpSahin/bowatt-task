@@ -1,0 +1,12 @@
+# Virtual environment (lives at the repo root)
+.venv/
+
+# Secrets anywhere in the repo
+.env
+
+# Task brief from Bowatt - not for a public repo
+*.pdf
+
+# OS / editor noise
+.DS_Store
+.vscode/

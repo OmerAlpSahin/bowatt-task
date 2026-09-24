@@ -1,0 +1,8 @@
+fastapi
+python-dotenv
+uvicorn
+python-multipart
+anthropic
+chromadb
+tavily-python
+sentence-transformers
